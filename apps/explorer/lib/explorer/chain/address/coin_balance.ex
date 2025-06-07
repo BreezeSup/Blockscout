@@ -1,0 +1,166 @@
+defmodule Explorer.Chain.Address.CoinBalance do
+  @moduledoc """
+  The `t:Explorer.Chain.Wei.t/0` `value` of `t:Explorer.Chain.Address.t/0` at the end of a `t:Explorer.Chain.Block.t/0`
+  `t:Explorer.Chain.Block.block_number/0`.
+  """
+
+  use Explorer.Schema
+
+  alias Explorer.PagingOptions
+  alias Explorer.Chain.{Address, Block, Hash, Wei}
+  alias Explorer.Chain.Address.CoinBalance
+
+  @optional_fields ~w(value value_fetched_at)a
+  @required_fields ~w(address_hash block_number)a
+  @allowed_fields @optional_fields ++ @required_fields
+
+  @typedoc """
+   * `address` - the `t:Explorer.Chain.Address.t/0` with `value` at end of `block_number`.
+   * `address_hash` - foreign key for `address`.
+   * `block_number` - the `t:Explorer.Chain.Block.block_number/0` for the `t:Explorer.Chain.Block.t/0` at the end of
+       which `address` had `value`.  When `block_number` is the greatest `t:Explorer.Chain.Block.block_number/0` for a
+       given `address`, the `t:Explorer.Chain.Address.t/0` `fetched_coin_balance_block_number` will match this value.
+   * `inserted_at` - When the balance was first inserted into the database.
+   * `updated_at` - When the balance was last updated.
+   * `value` - the value of `address` at the end of the `t:Explorer.Chain.Block.block_number/0` for the
+       `t:Explorer.Chain.Block.t/0`.  When `block_number` is the greatest `t:Explorer.Chain.Block.block_number/0` for a
+       given `address`, the `t:Explorer.Chain.Address.t/0` `fetched_coin_balance` will match this value.
+   * `value_fetched_at` - when `value` was fetched.
+  """
+  @primary_key false
+  typed_schema "address_coin_balances" do
+    field(:block_number, :integer) :: Block.block_number()
+    field(:value, Wei)
+    field(:value_fetched_at, :utc_datetime_usec)
+    field(:delta, Wei, virtual: true)
+    field(:transaction_hash, Hash.Full, virtual: true)
+    field(:block_timestamp, :utc_datetime_usec, virtual: true)
+
+    timestamps()
+
+    belongs_to(:address, Address, foreign_key: :address_hash, references: :hash, type: Hash.Address, null: false)
+  end
+
+  @doc """
+  Builds an `Ecto.Query` to fetch the coin balance of the given address in the given block.
+  """
+  def fetch_coin_balance(address_hash, block_number) do
+    coin_balance_subquery =
+      from(
+        cb in CoinBalance,
+        where: cb.address_hash == ^address_hash,
+        where: cb.block_number <= ^block_number,
+        inner_join: b in Block,
+        on: cb.block_number == b.number,
+        limit: ^2,
+        order_by: [desc: :block_number],
+        select_merge: %{block_timestamp: b.timestamp}
+      )
+
+    from(
+      cb in subquery(coin_balance_subquery),
+      limit: ^1,
+      order_by: [desc: :block_number],
+      select_merge: %{delta: fragment("value - coalesce(lag(value, 1) over (order by block_number), 0)")}
+    )
+  end
+
+  def fetch_coin_balances(address_hash, %PagingOptions{page_size: page_size}) do
+    query =
+      from(
+        cb in CoinBalance,
+        where: cb.address_hash == ^address_hash,
+        where: not is_nil(cb.value),
+        order_by: [desc: :block_number],
+        select_merge: %{
+          delta: fragment("? - coalesce(lead(?, 1) over (order by ? desc), 0)", cb.value, cb.value, cb.block_number)
+        }
+      )
+
+    from(balance in subquery(query),
+      where: balance.delta != 0,
+      limit: ^page_size,
+      select_merge: %{
+        transaction_hash: nil
+      }
+    )
+  end
+
+  @doc """
+  Builds an `Ecto.Query` to fetch a series of balances by day for the given account. Each element in the series
+  corresponds to the maximum balance in that day. Only the last 90 days of data are used.
+  """
+  def balances_by_day(address_hash, block_timestamp \\ nil) do
+    days_to_consider =
+      Application.get_env(:block_scout_web, BlockScoutWeb.Chain.Address.CoinBalance)[:coin_balance_history_days]
+
+    CoinBalance
+    |> join(:inner, [cb], block in Block, on: cb.block_number == block.number)
+    |> where([cb], cb.address_hash == ^address_hash)
+    |> limit_time_interval(days_to_consider, block_timestamp)
+    |> group_by([cb, block], fragment("date_trunc('day', ?)", block.timestamp))
+    |> order_by([cb, block], fragment("date_trunc('day', ?)", block.timestamp))
+    |> select([cb, block], %{date: type(fragment("date_trunc('day', ?)", block.timestamp), :date), value: max(cb.value)})
+  end
+
+  def limit_time_interval(query, days_to_consider, nil) do
+    query
+    |> where(
+      [cb, block],
+      block.timestamp >=
+        fragment("date_trunc('day', now() - CAST(? AS INTERVAL))", ^%Postgrex.Interval{days: days_to_consider})
+    )
+  end
+
+  def limit_time_interval(query, days_to_consider, %{timestamp: timestamp}) do
+    query
+    |> where(
+      [cb, block],
+      block.timestamp >=
+        fragment(
+          "(? AT TIME ZONE ?) - CAST(? AS INTERVAL)",
+          ^timestamp,
+          ^"Etc/UTC",
+          ^%Postgrex.Interval{days: days_to_consider}
+        )
+    )
+  end
+
+  def last_coin_balance_timestamp(address_hash) do
+    coin_balance_query =
+      CoinBalance
+      |> where([cb], cb.address_hash == ^address_hash)
+      |> last(:block_number)
+      |> select([cb, b], %{block_number: cb.block_number, value: cb.value})
+
+    from(
+      cb in subquery(coin_balance_query),
+      inner_join: block in Block,
+      on: cb.block_number == block.number,
+      where: block.consensus == true,
+      select: %{timestamp: block.timestamp, value: cb.value}
+    )
+  end
+
+  def changeset(%__MODULE__{} = balance, params) do
+    balance
+    |> cast(params, @allowed_fields)
+    |> validate_required(@required_fields)
+    |> unique_constraint(:block_number, name: :address_coin_balances_address_hash_block_number_index)
+  end
+
+  @doc """
+  Query to fetch latest coin balance for the given address
+  """
+  @spec latest_coin_balance_query(Hash.Address.t(), non_neg_integer() | {:error, :empty_database}) :: Ecto.Query.t()
+  def latest_coin_balance_query(address_hash, stale_balance_window) do
+    from(
+      cb in __MODULE__,
+      where: cb.address_hash == ^address_hash,
+      where: cb.block_number >= ^stale_balance_window,
+      where: is_nil(cb.value_fetched_at),
+      order_by: [desc: :block_number],
+      limit: 1
+    )
+  end
+end
