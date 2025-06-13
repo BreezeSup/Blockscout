@@ -1,0 +1,35 @@
+name: Comment on Every New Issue and PR
+
+permissions:
+  issues: write
+  pull-requests: write
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Comment on Issue or PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const isIssue = !!context.payload.issue;
+            const number = isIssue ? context.payload.issue.number : context.payload.pull_request.number;
+            const type = isIssue ? "issue" : "pull request";
+
+            const message = isIssue
+              ? "👋 Please note that this issue will be automatically closed shortly. For prompt assistance and a timely resolution, we kindly advise reaching out to our Live Support Team directly."
+              : "🎉 Thanks for opening a pull request! We're excited to review your contribution.";
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: number,
+              body: message + "\n\nStay awesome! 🚀"
+            });
