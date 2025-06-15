@@ -11,124 +11,125 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Post 10 Customized Issues with Metadata
+      - name: Post 20 Customized Issues with Metadata
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issues = [  {
-    title: "🐛 Bug: Gas tracker page shows chart even if disabled", body: "The Gas price history chart should not be visible if it is not enabled in the settings.", labels: ["bug", "frontend"]
-    },
-  {
-    title: "✨ UX: Click area – entire line",
-    body: "Enhance user interaction by making the entire line clickable, improving usability.",
-    labels: ["enhancement", "frontend"]
-  },
-  {
-    title: "💅 UI: General design improvements",
-    body: "Perform a series of small UX/UI enhancements across the Blockscout frontend.",
-    labels: ["enhancement", "design"]
-  },
-  {
-    title: "🛠 Fix: Homepage alert padding",
-    body: "Adjust the spacing and padding between information alerts on the homepage.",
-    labels: ["bug", "frontend"]
-  },
-  {
-    title: "⚙️ Feature: Add Events section",
-    body: "Implement an 'Events' section to display event logs and related data.",
-    labels: ["feature", "frontend"]
-  },
-  {
-    title: "🔐 Add EIP7702 authorization status",
-    body: "Show the EIP7702 authorization state for smart contract calls in the transaction view.",
-    labels: ["feature", "frontend"]
-  },
-  {
-    title: "📦 Review multisender widget",
-    body: "Ensure the multisender component works properly and aligns with UI standards.",
-    labels: ["task", "frontend"]
-  },
-  {
-    title: "🔒 Console message warning for script execution",
-    body: "Add a console message to warn users about executing scripts from the developer tools.",
-    labels: ["security", "frontend"]
-  },
-  {
-    title: "🌐 Celo L2 Epochs support",
-    body: "Enable the display and handling of epoch data on Celo Layer 2 networks.",
-    labels: ["feature", "L2"]
-  },
-  {
-    title: "🚧 Interop mode MVP for product",
-    body: "Build a minimum viable product version of interoperability mode across chains.",
-    labels: ["feature", "interop"]
-  },
-  {
-    title: "🧩 Support multiple interop messages",
-    body: "Update the transaction page to allow displaying more than one interoperability message.",
-    labels: ["feature", "interop"]
-  },
-  {
-    title: "📝 Improve validation on Public Tag comment field",
-    body: "Enhance the validation logic for the comment field in the tag submission form.",
-    labels: ["bug", "form"]
-  },
-  {
-    title: "❗ Bug: Verified contracts marked as Partial Match",
-    body: "Contracts verified with the correct source and constructor are still flagged as partial matches.",
-    labels: ["bug", "verification"]
-  },
-  {
-    title: "🌍 Feature: Base URL support for cluster chains",
-    body: "Add configuration for setting a base URL per chain in cluster mode.",
-    labels: ["feature", "multichain"]
-  },
-  {
-    title: "🔁 ENS reverse resolving across chains",
-    body: "Implement reverse ENS name resolving functionality for multichain environments.",
-    labels: ["enhancement", "ENS"]
-  },
-  {
-    title: "🔍 Upgrade multichain search",
-    body: "Improve search capabilities to handle and prioritize multichain results more efficiently.",
-    labels: ["enhancement", "search"]
-  },
-  {
-    title: "🎨 Backend: Extend schema for NFTs",
-    body: "Update database schema to fully support NFT-related data.",
-    labels: ["enhancement", "NFT"]
-  },
-  {
-    title: "📉 Track removed environment variables",
-    body: "Improve env-collector to detect and log removed environment variables for debugging.",
-    labels: ["feature", "infra"]
-  },
-  {
-    title: "♻️ Retry import for missed multichain data",
-    body: "Add retry mechanisms for missed interop import jobs for multichain data syncing.",
-    labels: ["bug", "sync"]
-  },
-  {
-    title: "📈 Add cluster stats to interop explorer homepage",
-    body: "Display live statistics for each cluster chain on the interoperability explorer homepage.",
-    labels: ["feature", "interop"]
-  }
-];
+            const issues = [
+              {
+                title: "🐛 Bug: Gas tracker page shows chart even if disabled",
+                body: "The Gas price history chart should not be visible if it is not enabled in the settings.",
+                labels: ["bug", "frontend"]
+              },
+              {
+                title: "✨ UX: Click area – entire line",
+                body: "Enhance user interaction by making the entire line clickable, improving usability.",
+                labels: ["enhancement", "frontend"]
+              },
+              {
+                title: "💅 UI: General design improvements",
+                body: "Perform a series of small UX/UI enhancements across the Blockscout frontend.",
+                labels: ["enhancement", "design"]
+              },
+              {
+                title: "🛠 Fix: Homepage alert padding",
+                body: "Adjust the spacing and padding between information alerts on the homepage.",
+                labels: ["bug", "frontend"]
+              },
+              {
+                title: "⚙️ Feature: Add Events section",
+                body: "Implement an 'Events' section to display event logs and related data.",
+                labels: ["feature", "frontend"]
+              },
+              {
+                title: "🔐 Add EIP7702 authorization status",
+                body: "Show the EIP7702 authorization state for smart contract calls in the transaction view.",
+                labels: ["feature", "frontend"]
+              },
+              {
+                title: "📦 Review multisender widget",
+                body: "Ensure the multisender component works properly and aligns with UI standards.",
+                labels: ["task", "frontend"]
+              },
+              {
+                title: "🔒 Console message warning for script execution",
+                body: "Add a console message to warn users about executing scripts from the developer tools.",
+                labels: ["security", "frontend"]
+              },
+              {
+                title: "🌐 Celo L2 Epochs support",
+                body: "Enable the display and handling of epoch data on Celo Layer 2 networks.",
+                labels: ["feature", "L2"]
+              },
+              {
+                title: "🚧 Interop mode MVP for product",
+                body: "Build a minimum viable product version of interoperability mode across chains.",
+                labels: ["feature", "interop"]
+              },
+              {
+                title: "🧩 Support multiple interop messages",
+                body: "Update the transaction page to allow displaying more than one interoperability message.",
+                labels: ["feature", "interop"]
+              },
+              {
+                title: "📝 Improve validation on Public Tag comment field",
+                body: "Enhance the validation logic for the comment field in the tag submission form.",
+                labels: ["bug", "form"]
+              },
+              {
+                title: "❗ Bug: Verified contracts marked as Partial Match",
+                body: "Contracts verified with the correct source and constructor are still flagged as partial matches.",
+                labels: ["bug", "verification"]
+              },
+              {
+                title: "🌍 Feature: Base URL support for cluster chains",
+                body: "Add configuration for setting a base URL per chain in cluster mode.",
+                labels: ["feature", "multichain"]
+              },
+              {
+                title: "🔁 ENS reverse resolving across chains",
+                body: "Implement reverse ENS name resolving functionality for multichain environments.",
+                labels: ["enhancement", "ENS"]
+              },
+              {
+                title: "🔍 Upgrade multichain search",
+                body: "Improve search capabilities to handle and prioritize multichain results more efficiently.",
+                labels: ["enhancement", "search"]
+              },
+              {
+                title: "🎨 Backend: Extend schema for NFTs",
+                body: "Update database schema to fully support NFT-related data.",
+                labels: ["enhancement", "NFT"]
+              },
+              {
+                title: "📉 Track removed environment variables",
+                body: "Improve env-collector to detect and log removed environment variables for debugging.",
+                labels: ["feature", "infra"]
+              },
+              {
+                title: "♻️ Retry import for missed multichain data",
+                body: "Add retry mechanisms for missed interop import jobs for multichain data syncing.",
+                labels: ["bug", "sync"]
+              },
+              {
+                title: "📈 Add cluster stats to interop explorer homepage",
+                body: "Display live statistics for each cluster chain on the interoperability explorer homepage.",
+                labels: ["feature", "interop"]
+              }
+            ];
 
             const milestoneTitle = "v1.0";
-            const assignees = ["VortexDev5"]; // 👈 change to your GitHub username
+            const assignees = ["VortexDev5"]; // 🔁 Change this to your GitHub username
 
-            // Get milestone ID from title
             const { data: milestones } = await github.rest.issues.listMilestones({
               owner: context.repo.owner,
               repo: context.repo.repo
             });
 
             const milestone = milestones.find(m => m.title === milestoneTitle);
-
             if (!milestone) {
-              throw new Error(❌ Milestone '${milestoneTitle}' not found.);
+              throw new Error(`❌ Milestone '${milestoneTitle}' not found.`);
             }
 
             for (const issue of issues) {
@@ -142,5 +143,5 @@ jobs:
                 milestone: milestone.number
               });
 
-              console.log(✅ Created: ${response.data.title} — ${response.data.html_url});
-            }
+              console.log(`✅ Created: ${response.data.title} — ${response.data.html_url}`);
+            }
