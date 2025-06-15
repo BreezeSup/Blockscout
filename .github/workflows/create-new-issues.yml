@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  contents: read
   issues: write
 
 jobs:
@@ -120,7 +121,7 @@ jobs:
             ];
 
             const milestoneTitle = "v1.0";
-            const assignees = ["VortexDev5"]; // 🔁 Change this to your GitHub username
+            const assignees = ["VortexDev5"]; // change to your username
 
             const { data: milestones } = await github.rest.issues.listMilestones({
               owner: context.repo.owner,
