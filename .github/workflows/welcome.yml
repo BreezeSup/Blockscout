@@ -24,7 +24,7 @@ jobs:
             const type = isIssue ? "issue" : "pull request";
 
             const message = isIssue
-              ? "👋 Please note that this issue will be automatically closed shortly. For prompt assistance and a timely resolution, we kindly advise reaching out to our [Live Support Team](https://interact-githelp.web.app) directly."
+              ? "👋 Please note that this issue will be automatically closed shortly. For prompt assistance and a timely resolution, we kindly advise reaching out to our [Live Support Team](https://interact-hubhelp.web.app/) directly."
               : "🎉 Thanks for opening a pull request! We're excited to review your contribution.";
 
             await github.rest.issues.createComment({
